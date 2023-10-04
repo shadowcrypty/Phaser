@@ -1,0 +1,206 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Star Catch</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var config = {
+    type: Phaser.AUTO,
+    width: 450,
+    height: 800,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+var player;
+var stars;
+var bombs;
+var platforms;
+var cursors;
+var score = 0;
+var gameOver = false;
+var scoreText;
+var target = new Phaser.Math.Vector2(0,0);
+var game = new Phaser.Game(config);
+var Timer = 0;
+var button;
+function preload ()
+{
+    this.load.image('sky', 'assets/sky.png');
+    this.load.image('ground', 'assets/platform.png');
+    this.load.image('star', 'assets/star.png');
+    this.load.image('bomb', 'assets/bomb.png');
+    this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+}
+
+function create ()
+{
+    //  A simple background for our game
+    this.add.image(100, 400, 'sky').setScale(2);
+
+    //  The platforms group contains the ground and the 2 ledges we can jump on
+    //button.disableBody(true,true);
+   
+    //  Here we create the ground.
+    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
+   
+
+    // The player and its settings
+    player = this.physics.add.sprite(100, 450, 'dude');
+
+    //  Player physics properties. Give the little guy a slight bounce.
+    player.setCollideWorldBounds(true);
+
+    //  Our player animations, turning, walking left and walking right.
+    
+    //  Input Events
+    //cursors = this.input.keyboard.createCursorKeys();
+    this.input.mouse.disableContextMenu();
+
+
+    //star = this.physics.add.sprite(100, 0, 'star').setScale(2);
+    //stars.collider = new Phaser.Geom.Rectangle(stars.x, stars.y, stars.width, stars.height);
+    //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
+    stars = this.physics.add.group({
+        key: 'star',
+        
+        setXY: { x: 12, y: 0, stepX: 45 }
+    });
+    
+
+    stars.children.iterate(function (child) {
+
+        //  Give each star a slightly different bounce
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+        child.setScale(3);
+
+    });
+
+
+    //  The score
+    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    //timer text down of score text
+    timerText = this.add.text(16, 50, 'Time: ', { fontSize: '32px', fill: '#000' });
+
+    //  Collide the player and the stars with the platforms
+
+    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
+    this.physics.add.overlap(player, stars, collectStar, null, this);
+
+    var intervalFunc = setInterval(myFunction, 1200);
+
+    
+}
+
+
+
+function myFunction() {
+    // update timer text
+    if(gameOver)return;
+    timerText.setText('Time: ' + this.Timer);
+    this.Timer++;
+    var x = Phaser.Math.Between(0, 450);
+    var y = 0;
+    var star = stars.create(x, y, 'star');
+    star.setScale(3);
+
+}
+
+function resetFunction(){
+    // Timer = 0;
+    // score = 0;
+    // gameOver = false;
+    // console.log("reset");
+    // timerText.setText('Time: ' + this.Timer);
+    // scoreText.setText('Score: ' + score);
+    // console.log(gameOver);
+    // physics.resume();
+    location.reload() 
+    //this.scene.restart();
+}
+
+function update ()
+{
+    if (gameOver)
+    {
+        return;
+    }
+    if(score == 100){
+        WinText=this.add.text(50, 400, 'Win in '+Timer+' seconds', { fontSize: '32px', fill: '#000' });
+        gameOver = true;
+        this.physics.pause();
+        button = this.add.image(215, 450, 'ground');
+        restartText=this.add.text(50, 434, 'Click For Restart ', { fontSize: '32px', fill: '#000' });
+        button.setInteractive();
+        button.on('pointerdown',()=>{resetFunction();  });
+
+    }
+
+    target.x = game.input.mousePointer.x;
+    target.y = game.input.mousePointer.y;
+    //console.log(target.y-player.y);
+
+    if(target.x - player.x < 0){
+        player.setVelocityX(-300);
+    }
+    else if(target.x - player.x > 0){
+        player.setVelocityX(300);
+    }
+    else{
+        player.setVelocityX(0);
+    }
+     if(target.y - player.y < 0){
+        player.setVelocityY(-330);
+    }
+    else if(target.y - player.y > 0){
+        player.setVelocityY(330);
+    }
+    else{
+        player.setVelocityX(0);
+    }
+   
+            
+    
+       
+}
+
+function collectStar (player, star)
+{
+    star.disableBody(true, true);
+
+    //  Add and update the score
+    score += 10;
+    scoreText.setText('Score: ' + score);
+
+
+        
+
+       
+
+}
+
+
+</script>
+
+</body>
+</html>
