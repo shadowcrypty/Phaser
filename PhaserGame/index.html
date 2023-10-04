@@ -108,8 +108,14 @@ function create ()
     this.physics.add.overlap(player, stars, collectStar, null, this);
 
     var intervalFunc = setInterval(myFunction, 1200);
+    game.input.addPointer();
+    this.input.on('pointermove', function (pointer)
+        {
 
-    
+            target.x = pointer.x;
+            target.y = pointer.y;
+
+        }, this);
 }
 
 
@@ -156,8 +162,8 @@ function update ()
 
     }
 
-    target.x = game.input.mousePointer.x;
-    target.y = game.input.mousePointer.y;
+    // target.x = game.input.pointer1.x;
+    // target.y = game.input.pointer1.y;
     //console.log(target.y-player.y);
 
     if(target.x - player.x < 0){
